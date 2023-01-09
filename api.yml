@@ -1,0 +1,1278 @@
+openapi: 3.0.3
+info:
+  version: 0.0.1
+  title: Parking Reservation System API
+  description: API for managing parking reservations
+  contact:
+    name: Adobe Basel Apprentice Team
+    email: apprentices@adobe.com
+    url: https://adobe.com
+  license:
+    name: Copyright 2023 Adobe Inc. All rights reserved.
+    url: https://adobe.com
+servers:
+  - url: https://api.example.com
+    description: Production server
+  - url: https://test-api.example.com
+    description: Test server
+  - url: https://dev-api.example.com
+    description: Development server
+security:
+  - BasicAuth: []
+paths:
+  /users:
+    get:
+      summary: List users
+      operationId: listUsers
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/PageSizeQuery'
+        - $ref: '#/components/parameters/SortByQuery'
+        - $ref: '#/components/parameters/OrderQuery'
+      responses:
+        '200':
+          description: Users found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user can list users
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /users/{id}:
+    patch:
+      summary: Update a user
+      operationId: updateUser
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          # for example if the preferredLanguage is not within the specified enum
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user or the user itself can update the user
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      summary: Get a user
+      operationId: getUser
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Parking spot found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user or the user itself can read the user
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /users/{id}/change_role:
+    put:
+      summary: Change the role of a user
+      operationId: changeUserRole
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserChangeRoleRequest'
+      responses:
+        '200':
+          description: User role changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user can change a user role
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /users/{id}/disable:
+    put:
+      summary: Disable a user (denied login and cannot make reservations)
+      operationId: disableUser
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: User disabled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user can disable a user
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /users/{id}/enable:
+    put:
+      summary: Enable a user (can login and make reservations again)
+      operationId: enableUser
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: User enabled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user can enable a user
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /parking-spots:
+    post:
+      summary: Create a new parking spot
+      operationId: createParkingSpot
+      tags:
+        - parking-spots
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingSpot'
+      responses:
+        '201':
+          description: Parking spot created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingSpot'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user can create a parking spot
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          # If the unique parking spot number is already taken
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      summary: List parking spots
+      operationId: listParkingSpots
+      tags:
+        - parking-spots
+      parameters:
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/PageSizeQuery'
+        - $ref: '#/components/parameters/SortByQuery'
+        - $ref: '#/components/parameters/OrderQuery'
+      responses:
+        '200':
+          description: Parking spots found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingSpotListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user can list parking spots
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /parking-spots/availability:
+    get:
+      summary: Returns available parking spots for a given date, vehicle and full-/half-day filter. The vehicle owner is considered in the check.
+      operationId: checkParkingSpotAvailability
+      tags:
+        - parking-spots
+      parameters:
+        - $ref: '#/components/parameters/AvailabilityCheckDate'
+        - $ref: '#/components/parameters/AvailabilityCheckVehicleId'
+        - $ref: '#/components/parameters/AvailabilityCheckHalfDay'
+        - $ref: '#/components/parameters/AvailabilityCheckAm'
+      responses:
+        '200':
+          description: Availability retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailabilityResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # If the user (= the vehicle owner):
+          # - will exceed 3 reservations per week
+          # - already has a reservation today
+          # - requests a date more than two weeks into the future
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          # If the given vehicle cannot be found
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /parking-spots/today:
+    get:
+      summary: List parking spots and any reservations + vehicles on today's date
+      operationId: listParkingSpotsToday
+      tags:
+        - parking-spots
+      responses:
+        '200':
+          description: Parking spots found with optional reservations + vehicles today
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingSpotWithReservationsAndVehicles'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user or LED-Matrix role can perform this operation
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /parking-spots/{id}:
+    patch:
+      summary: Update a parking spot
+      operationId: updateParkingSpot
+      tags:
+        - parking-spots
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingSpot'
+      responses:
+        '200':
+          description: Parking spot updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingSpot'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user can update a parking spot
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          # If the unique parking spot number is already taken
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      summary: Get a parking spot
+      operationId: getParkingSpot
+      tags:
+        - parking-spots
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Parking spot found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingSpot'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user can read a parking spot
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      summary: Remove a parking spot
+      operationId: removeParkingSpot
+      tags:
+        - parking-spots
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user can remove a parking spot
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /parking-spots/{id}/set_unavailable:
+    put:
+      summary: Set a parking spot as unavailable (not usable for reservations). Automatically clears existing reservations.
+      operationId: setParkingSpotUnavailable
+      tags:
+        - parking-spots
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingSpotSetUnavailableRequest'
+      responses:
+        '200':
+          description: Parking spot set as unavailable successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingSpot'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user can set a parking spot unavailable
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /parking-spots/{id}/set_available:
+    put:
+      summary: Set a parking spot as available (usable for reservations).
+      operationId: setParkingSpotAvailable
+      tags:
+        - parking-spots
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Parking spot set as available successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingSpot'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user can set a parking spot available
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /reservations:
+    post:
+      summary: Create a new reservation
+      operationId: createReservation
+      tags:
+        - reservations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationCreateRequest'
+      responses:
+        '201':
+          description: Reservation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          # If either the parking spot, user or vehicle cannot be found
+          $ref: '#/components/responses/NotFound'
+        '409':
+          # If the reservation overlaps with an existing one or the
+          # vehicle is a motorcycle and there's already two reservations on the parking spot
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      summary: List reservations
+      operationId: listReservations
+      tags:
+        - reservations
+      parameters:
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/PageSizeQuery'
+        - $ref: '#/components/parameters/SortByQuery'
+        - $ref: '#/components/parameters/OrderQuery'
+      responses:
+        '200':
+          description: Reservations found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /reservations/{id}:
+    patch:
+      summary: Update a reservation
+      operationId: updateReservation
+      tags:
+        - reservations
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+      responses:
+        '200':
+          description: Reservation updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user or the reservation owner can update a reservation
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          # If the reservation overlaps with an existing one or the
+          # vehicle is a motorcycle and there's already two reservations on the parking spot
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      summary: Get a reservation
+      operationId: getReservation
+      tags:
+        - reservations
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Reservation found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /reservations/{id}/cancel:
+    put:
+      summary: Cancel a reservation
+      operationId: cancelReservation
+      tags:
+        - reservations
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Reservation cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationCancelResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user or the owner can cancel a reservation
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /vehicles:
+    post:
+      summary: Create a new vehicle
+      operationId: createVehicle
+      tags:
+        - vehicles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+      responses:
+        '201':
+          description: Vehicle created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          # If either owner cannot be found
+          $ref: '#/components/responses/NotFound'
+        '409':
+          # If the license plate number is already present
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      summary: List vehicles that are owned by the authenticated user, or all vehicles if administrative user
+      operationId: listVehicles
+      tags:
+        - vehicles
+      parameters:
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/PageSizeQuery'
+        - $ref: '#/components/parameters/SortByQuery'
+        - $ref: '#/components/parameters/OrderQuery'
+      responses:
+        '200':
+          description: Vehicles found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /vehicles/{id}:
+    patch:
+      summary: Update a vehicle
+      operationId: updateVehicle
+      tags:
+        - vehicles
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+      responses:
+        '200':
+          description: Vehicle updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user or the owner can update a vehicle
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          # If the license plate number is already taken
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      summary: Get a vehicle
+      operationId: getVehicle
+      tags:
+        - vehicles
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Vehicle found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user or the owner can read a vehicle
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      summary: Remove a vehicle
+      operationId: removeVehicle
+      tags:
+        - vehicles
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          # Only an administrative user or the owner can remove a vehicle
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+  parameters:
+    AvailabilityCheckDate:
+      name: date
+      in: query
+      description: The date for which to check available parking spots
+      required: true
+      schema:
+        type: string
+        format: date
+      example: 2022-12-24
+    AvailabilityCheckVehicleId:
+      name: vehicle_id
+      in: query
+      description: Identifies the vehicle and owner for which a reservation is intended.
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
+    AvailabilityCheckHalfDay:
+      name: half_day
+      in: query
+      description: Whether availability should be checked for a half-day reservation (false for full-day)
+      required: false
+      schema:
+        type: boolean
+        default: false
+      example: true
+    AvailabilityCheckAm:
+      name: am
+      in: query
+      description: If halfDay is true, whether a reservation is intended ante- or post-meridian (morning or afternoon)
+      required: false
+      schema:
+        type: boolean
+        default: false
+      example: false
+    Id:
+      name: id
+      in: path
+      required: true
+      description: Id of the base entity
+      schema:
+        type: string
+      example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
+    PageQuery:
+      name: page
+      in: query
+      description: 'Requested page. Skips to page according to page_size.'
+      required: false
+      schema:
+        type: number
+        minimum: 0
+        default: 0
+    PageSizeQuery:
+      name: page_size
+      in: query
+      description: 'Specifies the page size for pagination.'
+      required: false
+      schema:
+        type: number
+        minimum: 1
+        default: 100
+    SortByQuery:
+      name: sortBy
+      in: query
+      description: 'By which field to sort the result.'
+      required: false
+      schema:
+        type: string
+        default: createdAt
+    OrderQuery:
+      name: order
+      in: query
+      description: 'Specifies the order of results'
+      required: false
+      schema:
+        type: string
+        default: DESC
+        enum:
+          - ASC
+          - DESC
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Bad request"
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Conflict"
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Forbidden"
+    NoContent:
+      description: No Content
+      content:
+        application/json:
+          schema: { }
+          example: { }
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Not found"
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Internal server error"
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Unauthorized"
+  schemas:
+    IdField:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: The unique internal identifier for this object.
+          example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
+    AuditFields:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time this object was created
+          example: 2021-01-30T10:30:00Z
+        created_by:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Identifies the user that created this object.
+          example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          default: null
+          description: The time this object was created
+          example: 2021-01-30T10:30:00Z
+        updated_by:
+          type: string
+          format: uuid
+          readOnly: true
+          default: null
+          description: Identifies the user that last modified this object.
+          example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
+    ListResponse:
+      # json.total_count @users.total_count
+      #json.total_pages @users.total_pages
+      #json.current_page @users.current_page
+      #json.limit_per_page @users.limit_value
+      type: object
+      properties:
+        limit_per_page:
+          type: integer
+          readOnly: true
+          description: The current page size.
+          example: 100
+        total_count:
+          type: integer
+          readOnly: true
+          description: The total number of results
+          example: 1000
+        current_page:
+          type: integer
+          readOnly: true
+          description: The current page number
+          example: 2
+        total_pages:
+          type: integer
+          readOnly: true
+          description: The total number of pages
+          example: 2
+    ParkingSpotSetUnavailableRequest:
+      type: object
+      properties:
+        unavailability_reason:
+          type: string
+          description: The optional reason for setting the parking spot unavailable
+          example: LED Panel Maintenance
+    ReservationCancelResponse:
+      type: object
+      properties:
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time this reservation was created
+          example: 2021-01-30T10:30:00Z
+        cancelled_by:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Identifies the user that cancelled this reservations.
+          example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
+    UserChangeRoleRequest:
+      type: object
+      required:
+        - role
+      properties:
+        role:
+          type: string
+          description: The user's role to set.
+          enum:
+            - admin
+            - user
+          example: admin
+    UserUpdateRequest:
+      type: object
+      required:
+        - preferredLanguage
+      properties:
+        preferred_language:
+          type: string
+          description: The user's preferred language to which responses and UI will be internationalized.
+          enum:
+            - en
+            - de
+            - fr
+          example: en
+    AvailabilityResponse:
+      type: object
+      properties:
+        available_parking_spots:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParkingSpot'
+    ParkingSpotWithReservationsAndVehicles:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ParkingSpot'
+        - type: object
+          properties:
+            reservations:
+              type: array
+              items:
+                $ref: '#/components/schemas/ReservationWithVehicle'
+    ParkingSpot:
+      type: object
+      required:
+        - number
+      allOf:
+        - $ref: '#/components/schemas/IdField'
+        - $ref: '#/components/schemas/AuditFields'
+        - type: object
+          properties:
+            number:
+              type: integer
+              format: int32
+              description: The unique number of the parking spot as painted on its surface.
+              minimum: 1
+              example: 6
+            charger_available:
+              type: boolean
+              default: false
+              description: Indicates whether this parking spot is equipped with a charger for electric vehicles.
+              example: true
+            unavailable:
+              type: boolean
+              default: false
+              readOnly: true
+              description: Indicates whether this parking spot is available for reservations or not.
+              example: true
+            unavailability_reason:
+              type: string
+              default: null
+              readOnly: true
+              description: Optionally indicates the reason for the parking spot having been set unavailable.
+    ReservationWithVehicle:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Reservation'
+        - type: object
+          properties:
+            vehicle:
+              $ref: '#/components/schemas/Vehicle'
+    Reservation:
+      type: object
+      required:
+        - parkingSpotId
+        - userId
+        - vehicleId
+        - date
+        - halfDay
+        - am
+      allOf:
+        - $ref: '#/components/schemas/IdField'
+        - $ref: '#/components/schemas/AuditFields'
+        - type: object
+          properties:
+            parking_spot_id:
+              type: string
+              format: uuid
+              description: Identifies the parking spot reserved during the time of this reservation.
+              example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
+            user_id:
+              type: string
+              format: uuid
+              description: Identifies the user that made this reservation.
+              example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
+            vehicle_id:
+              type: string
+              format: uuid
+              description: Identifies the vehicle (owned by the reservation user) that is intended to be on the reserved parking spot during the time of this reservation.
+              example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
+            cancelled:
+              type: boolean
+              default: false
+              readOnly: true
+              description: Indicates whether this reservation is in cancelled state and is therefore removed from capacity checks.
+              example: false
+            date:
+              type: string
+              format: date
+              description: The date on which this reservation is effective.
+              example: 2021-12-31
+            start_time:
+              type: string
+              format: date-time
+              readOnly: true
+              description: The beginning time of this reservation in ISO 8601 full-time format.
+              example: 2021-01-30T08:30:00Z
+            end_time:
+              type: string
+              format: date-time
+              readOnly: true
+              description: The ending time of this reservation in ISO 8601 full-time format.
+              example: 2021-01-30T10:30:00Z
+            half_day:
+              type: boolean
+              description: Indicates whether this reservation was created as a half-day or full-day reservation.
+              default: false
+              example: true
+            am:
+              type: boolean
+              description: Indicates, if this reservation is a half-day reservation, whether the half day is ante- or post meridian (first, or second half of the day).
+              default: null
+              example: true
+            cancelled_at:
+              type: string
+              format: date-time
+              readOnly: true
+              default: null
+              description: The time this reservation was cancelled at
+              example: 2021-01-30T10:30:00Z
+            cancelled_by:
+              type: string
+              format: uuid
+              readOnly: true
+              default: null
+              description: Identifies the user that cancelled this reservations.
+              example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
+    ReservationCreateRequest:
+      type: object
+      required:
+        - parking_spot_id
+        - user_id
+        - vehicle_id
+        - date
+      properties:
+        parking_spot_id:
+          type: string
+          format: uuid
+          description: Identifies the parking spot reserved during the time of this reservation.
+          example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
+        user_id:
+          type: string
+          format: uuid
+          description: Identifies the user that made this reservation.
+          example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
+        vehicle_id:
+          type: string
+          format: uuid
+          description: Identifies the vehicle (owned by the reservation user) that is intended to be on the reserved parking spot during the time of this reservation.
+          example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
+        date:
+          type: string
+          format: date
+          description: The date on which this reservation is effective.
+          example: 2021-12-31
+        half_day:
+          type: boolean
+          description: Indicates whether this reservation was created as a half-day or full-day reservation.
+          default: false
+          example: true
+        am:
+          type: boolean
+          description: Indicates, if this reservation is a half-day reservation, whether the half day is ante- or post meridian (first, or second half of the day).
+          default: null
+          example: true
+    User:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/IdField'
+        - $ref: '#/components/schemas/AuditFields'
+        - type: object
+          properties:
+            okta_id:
+              type: string
+              readOnly: true
+              description: The Okta unique user ID as synced from the login session.
+              example: ABCD1234@AdobeOrg
+            disabled:
+              type: boolean
+              default: false
+              example: true
+            email:
+              type: string
+              format: email
+              readOnly: true
+              description: The email of the user as synced from the Okta login session.
+              example: someuser@adobe.com
+            first_name:
+              type: string
+              readOnly: true
+              description: The first of the user as synced from the Okta login session.
+              example: Jane
+            last_name:
+              type: string
+              readOnly: true
+              description: The last name of the user as synced from the Okta login session.
+              example: Doe
+            preferred_language:
+              type: string
+              description: The user's preferred language to which responses and UI will be internationalized.
+              enum:
+                - en
+                - de
+                - fr
+              default: en
+              example: en
+            role:
+              type: string
+              description: The user's role
+              enum:
+                - admin
+                - user
+              default: user
+              example: admin
+            username:
+              type: string
+              readOnly: true
+              description: The username of the user as synced from the Okta login session.
+              example: someuser
+    Vehicle:
+      type: object
+      required:
+        - licensePlateNumber
+        - make
+        - model
+        - type
+      allOf:
+        - $ref: '#/components/schemas/IdField'
+        - $ref: '#/components/schemas/AuditFields'
+        - type: object
+          properties:
+            user_id:
+              type: string
+              format: uuid
+              description: Identifies the user that owns this vehicle.
+              example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
+            ev:
+              type: boolean
+              default: false
+              description: Indicates whether this vehicle is an electric vehicle, i.e. might benefit from a parking spot with electrical charger available.
+              example: true
+            license_plate_number:
+              type: string
+              description: The unique and full license plate number as affixed to the vehicle.
+              example: ABC123
+            make:
+              type: string
+              description: The name of the maker (manufacturer) of the vehicle.
+              example: Ford
+            model:
+              type: string
+              description: The name of the specific vehicle model.
+              example: Focus
+            vehicle_type:
+              type: string
+              description: Indicates whether this vehicle is a car or a motorcycle.
+              enum:
+                - car
+                - motorcycle
+    ParkingSpotListResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ListResponse'
+        - type: object
+          properties:
+            parking_spots:
+              type: array
+              readOnly: true
+              items:
+                $ref: '#/components/schemas/ParkingSpot'
+    ReservationListResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ListResponse'
+        - type: object
+          properties:
+            reservations:
+              type: array
+              readOnly: true
+              items:
+                $ref: '#/components/schemas/ReservationWithVehicle'
+    UserListResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ListResponse'
+        - type: object
+          properties:
+            users:
+              type: array
+              readOnly: true
+              items:
+                $ref: '#/components/schemas/User'
+    VehicleListResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ListResponse'
+        - type: object
+          properties:
+            vehicles:
+              type: array
+              readOnly: true
+              items:
+                $ref: '#/components/schemas/Vehicle'
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: "Server error"

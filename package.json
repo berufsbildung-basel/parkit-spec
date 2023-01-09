@@ -1,0 +1,15 @@
+{
+  "name": "parkit-spec",
+  "description": "HTTP API Specification for the PARKIT-Project",
+  "version": "0.0.1",
+  "author": "Adobe Berufsbildung Basel <berufsbildung@adobe.com>",
+  "license": "MIT",
+  "scripts": {
+    "docs": "redocly build-docs ./api.yml -o ./docs/index.html",
+    "docs:serve": "redocly preview-docs ./api.yml",
+    "lint": "redocly lint ./api.yml"
+  },
+  "devDependencies": {
+    "@redocly/cli": "1.0.0-beta.120"
+  }
+}
