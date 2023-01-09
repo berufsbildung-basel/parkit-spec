@@ -3,6 +3,14 @@
   "description": "HTTP API Specification for the PARKIT-Project",
   "version": "0.0.1",
   "author": "Adobe Berufsbildung Basel <berufsbildung@adobe.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/berufsbildung-basel/parkit-spec"
+  },
+  "bugs": {
+    "url": "https://github.com/berufsbildung-basel/parkit-spec/issues"
+  },
+  "homepage": "https://github.com/berufsbildung-basel/parkit-spec#readme",
   "license": "MIT",
   "scripts": {
     "docs": "redocly build-docs ./api.yml -o ./docs/index.html",
