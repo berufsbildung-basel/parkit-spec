@@ -887,10 +887,6 @@ components:
           description: Identifies the user that last modified this object.
           example: ccf8d1c6-f927-4e51-8de4-4d4a4f4be623
     ListResponse:
-      # json.total_count @users.total_count
-      #json.total_pages @users.total_pages
-      #json.current_page @users.current_page
-      #json.limit_per_page @users.limit_value
       type: object
       properties:
         limit_per_page:
@@ -1019,11 +1015,11 @@ components:
     Reservation:
       type: object
       required:
-        - parkingSpotId
-        - userId
-        - vehicleId
+        - parking_spot_id
+        - user_id
+        - vehicle_id
         - date
-        - halfDay
+        - half_day
         - am
       allOf:
         - $ref: '#/components/schemas/IdField'
@@ -1187,10 +1183,10 @@ components:
     Vehicle:
       type: object
       required:
-        - licensePlateNumber
+        - license_plate_number
         - make
         - model
-        - type
+        - vehicle_type
       allOf:
         - $ref: '#/components/schemas/IdField'
         - $ref: '#/components/schemas/AuditFields'
