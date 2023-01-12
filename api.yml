@@ -462,8 +462,7 @@ paths:
           # If either the parking spot, user or vehicle cannot be found
           $ref: '#/components/responses/NotFound'
         '409':
-          # If the reservation overlaps with an existing one or the
-          # vehicle is a motorcycle and there's already two reservations on the parking spot
+          # If the reservation overlaps with an existing one
           $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/ServerError'
@@ -521,8 +520,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          # If the reservation overlaps with an existing one or the
-          # vehicle is a motorcycle and there's already two reservations on the parking spot
+          # If the reservation overlaps with an existing one
           $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/ServerError'
@@ -1186,7 +1184,6 @@ components:
         - license_plate_number
         - make
         - model
-        - vehicle_type
       allOf:
         - $ref: '#/components/schemas/IdField'
         - $ref: '#/components/schemas/AuditFields'
@@ -1217,6 +1214,7 @@ components:
             vehicle_type:
               type: string
               description: Indicates whether this vehicle is a car or a motorcycle.
+              default: car
               enum:
                 - car
                 - motorcycle
