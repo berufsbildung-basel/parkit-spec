@@ -73,6 +73,8 @@ Permissions: CRU(D/N)
   - Uncancelled reservations
   - Cancelled reservations that were cancelled after their start time
 - A user cannot have more than one reservation per day
+  - Uncancelled reservations
+  - Cancelled reservations that were cancelled after their start time
 - A reservation cannot be deleted for history/tracking reasons, but set to cancelled instead
 - The time window (start-time => end-time) of reservations must not overlap
 
