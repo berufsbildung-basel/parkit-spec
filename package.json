@@ -1,7 +1,7 @@
 {
   "name": "@berufsbildung-basel/parkit-spec",
   "description": "HTTP API Specification for the PARKIT-Project",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Adobe Berufsbildung Basel <berufsbildung@adobe.com>",
   "repository": {
     "type": "git",
