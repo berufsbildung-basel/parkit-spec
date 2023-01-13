@@ -69,7 +69,9 @@ Permissions: CRU(D/N)
 - A parking spot can be reserved for one half-day or one full-day per date
 - A half-day reservation is either midnight to noon or noon to midnight
 - A user can reserve up to two weeks into the future
-- A user cannot have more than 3 reservations per week
+- A user cannot have more than 3 reservations per week. Reservations that are counted for this are:
+  - Uncancelled reservations
+  - Cancelled reservations that were cancelled after their start time
 - A user cannot have more than one reservation per day
 - A reservation cannot be deleted for history/tracking reasons, but set to cancelled instead
 - The time window (start-time => end-time) of reservations must not overlap
