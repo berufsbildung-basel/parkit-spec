@@ -12,7 +12,7 @@ This document outlines the general specification for the PARKIT Reservation Syst
 - Users: user accounts, mostly synced from Okta (username/email, first & last name) plus local profile settings
   (preferred language, ...), plus a "disabled" flag (set by administrators to prevent a user from reserving)
 - Vehicles: known vehicles, managed by their owners (users) under their profile. Fields: license plate number,
-  make, model, type (car or motorcycle), ev (electric vehicle, true/false)
+  make, model, vehicle type (car or motorcycle), ev (electric vehicle, true/false)
 - Parking Spots: available parking spots, managed by administrative users. Fields: Parking spot number, location.
 - Reservations: represents a reservation by users for a particular parking spot and vehicle. Has a start/end time
   on a specific date, being either a half- or full-day reservation.
@@ -55,7 +55,7 @@ Permissions: CRU(D/N)
 ### Rules
 
 #### Parking Spot
-- A parking spot can be occupied by one car or two motorcycles at the same time
+- A parking spot can be occupied by one car at the same time
 - A parking spot can be set "unavailable" (including an optional "reason" comment) by
   administrative users for a specified duration (start date/time, end date/time).
   Parking spots are "available" by default. When a parking spot is set to "unavailable",
@@ -69,15 +69,14 @@ Permissions: CRU(D/N)
 - A parking spot can be reserved for one half-day or one full-day per date
 - A half-day reservation is either midnight to noon or noon to midnight
 - A user can reserve up to two weeks into the future
-- A user cannot have more than 3 reservations per week
+- A user cannot have more than 3 reservations per week. Reservations that are counted for this are:
+  - Uncancelled reservations
+  - Cancelled reservations that were cancelled after their start time
 - A user cannot have more than one reservation per day
+  - Uncancelled reservations
+  - Cancelled reservations that were cancelled after their start time
 - A reservation cannot be deleted for history/tracking reasons, but set to cancelled instead
 - The time window (start-time => end-time) of reservations must not overlap
-  - Exception: if a reservation refers to a motorcycle, that particular parking spot may hold a second motorcycle.
-    This means the reservation time window of the second motorcycle on the same parking spot may overlap with the first one
-- If a new reservation is for a motorcycle and there is a parking spot that already holds one motorcycle reservation, the
-  user may only select that spot, in order to fill the parking spot to capacity, before blocking a new parking spot
-  for a motorcycle only (therefore sacrificing two parking spots for two motorcycles, that could fit into one spot instead)
 
 #### Vehicles
 - A vehicle cannot be deleted if referenced by reservations
@@ -136,8 +135,6 @@ Additionally:
 - Parking spot visualization should include an icon if it supports EV-charging
 - The UI should make an intelligent pre-selection of an available parking spot:
   - If the vehicle is an EV, select a parking spot with charger available
-  - If the vehicle is a motorcycle and there's already a reservation on a parking spot with a motorcycle, select that
-    parking spot to fill it up before blocking a new one
   - If the vehicle IS NOT an EV, select a parking spot without charger. If none is available, fall back to one with
     charger.
 
