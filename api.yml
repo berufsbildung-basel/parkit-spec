@@ -290,7 +290,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ParkingSpotWithReservationsAndVehicles'
+                type: object
+                properties:
+                  parkingSpots:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ParkingSpotWithReservationsAndVehicles'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
